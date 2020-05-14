@@ -77,7 +77,7 @@ class CommandHandler:
                 break
 
         if not executed and self.undefined:
-            self.undefined.action()
+            self.undefined.execute(req, res, session)
 
     def command(self, words, states):
         def decorator(func):
