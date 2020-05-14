@@ -6,6 +6,9 @@ from abc import ABCMeta, abstractmethod
 class BaseSkill:
     __metaclass__ = ABCMeta
 
+    def __init__(self):
+        self.logger = None
+
     @property
     def name(self):
         assert NotImplementedError
@@ -22,31 +25,33 @@ class BaseSkill:
     def command_handler(self):
         assert NotImplementedError
 
-    def logger(self):
+    def get_logger(self):
         if self.name is None:
             assert NotImplementedError("method 'name' isn't implemented")
             return
         if self.log_path is None:
             assert NotImplementedError("method 'log_path' isn't implemented")
             return
-        logger = logging.getLogger(self.name)
-        BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-        PATH = os.path.join(BASE_DIR, self.log_path)
-        handler = logging.FileHandler(PATH)
-        handler.setFormatter(logging.Formatter('%(asctime)s: %(message)s'))
-        logger.setLevel(logging.INFO)
-        logger.addHandler(handler)
 
-        return logger
+        if self.logger is None:
+            logger = logging.getLogger(self.name)
+            BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+            PATH = os.path.join(BASE_DIR, self.log_path)
+            handler = logging.FileHandler(PATH)
+            handler.setFormatter(logging.Formatter('%(asctime)s: %(message)s'))
+            logger.setLevel(logging.INFO)
+            logger.addHandler(handler)
+            self.logger = logger
+        return self.logger
 
     def log(self, req, res, session):
         user_id, original_utterance = CommandHandler.get_from_req(req, want=('user_id', 'original_utterance'))
         original_utterance = req.get('request', {}).get('original_utterance', 'Empty request')
-        self.logger().info(f"\n"
-                            f"USR: {user_id[:5]}\n"
-                            f"REQ: {original_utterance}\n"
-                            f"RES: {res['response']['text']}\n"
-                            f"----------------------")
+        self.get_logger().info(f"\n"
+                               f"USR: {user_id[:5]}\n"
+                               f"REQ: {original_utterance}\n"
+                               f"RES: {res['response']['text']}\n"
+                               f"----------------------")
 
 
 class Command:
@@ -57,7 +62,7 @@ class Command:
             if isinstance(states, tuple):
                 self.states = states
             else:
-                self.states = (states, )
+                self.states = (states,)
         if action is not None:
             self.action = action
 
@@ -92,17 +97,20 @@ class CommandHandler:
 
             self.commands.append(Command(words=words, states=states, action=wrapped))
             return wrapped
+
         return decorator
 
     def hello_command(self, action):
         def wrapped():
             return action
+
         self.hello = Command(action=wrapped)
         return wrapped
 
     def undefined_command(self, action):
         def wrapped():
             return action
+
         self.undefined = Command(action=wrapped)
         return wrapped
 
