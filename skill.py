@@ -86,7 +86,6 @@ class CommandHandler:
 
             self.commands.append(Command(words=words, states=states, action=wrapped))
             return wrapped
-
         return decorator
 
     def hello_command(self, action):

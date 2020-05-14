@@ -41,4 +41,4 @@ class ZhopaSkill(BaseSkill):
     name = 'zhopa'
     url = '/zhopa'
     log_path = 'log/logs.txt'
-    command_handler = CommandHandler()
+    command_handler = handler
