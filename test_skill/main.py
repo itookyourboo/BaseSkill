@@ -24,17 +24,19 @@ def no(req, res, session):
     res['session']['end_session'] = True
 
 
-@handler.undefined_command
-def undef(req, res, session):
-    if session['state'] == 0:
-        res['response']['text'] = 'Я не понимаю тебя'
+@handler.undefined_command(states=1)
+def play(req, res, session):
+    user_id, tokens = CommandHandler.get_from_req(req, ('user_id', 'tokens'))
+    if 'залупа' in tokens:
+        res['response']['text'] = 'Красава'
+        session['points'] += 1
     else:
-        user_id, tokens = CommandHandler.get_from_req(req, ('user_id', 'tokens'))
-        if 'залупа' in tokens:
-            res['response']['text'] = 'Красава'
-            session['points'] += 1
-        else:
-            res['response']['text'] = 'Дебил'
+        res['response']['text'] = 'Дебил'
+
+
+@handler.undefined_command(states=0)
+def wtf(req, res, session):
+    res['response']['text'] = 'Я не понимаю тебя'
 
 
 class ZhopaSkill(BaseSkill):

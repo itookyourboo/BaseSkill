@@ -73,7 +73,7 @@ class Command:
 class CommandHandler:
     def __init__(self):
         self.commands = []
-        self.undefined = None
+        self.undefined = []
         self.hello = None
 
     def execute(self, req, res, session):
@@ -87,8 +87,11 @@ class CommandHandler:
                 executed = True
                 break
 
-        if not executed and self.undefined is not None:
-            self.undefined.execute(req, res, session)
+        if not executed and len(self.undefined):
+            for cmd in self.undefined:
+                if session['state'] in cmd.states:
+                    cmd.execute(req, res, session)
+                    return
 
     def command(self, words, states):
         def decorator(func):
@@ -107,12 +110,15 @@ class CommandHandler:
         self.hello = Command(action=wrapped)
         return wrapped
 
-    def undefined_command(self, action):
-        def wrapped():
-            return action
+    def undefined_command(self, states):
+        def decorator(func):
+            def wrapped():
+                return func
 
-        self.undefined = Command(action=wrapped)
-        return wrapped
+            self.undefined.append(Command(states=states, action=wrapped))
+            return wrapped
+
+        return decorator
 
     @staticmethod
     def get_from_req(req, want):
