@@ -1,4 +1,5 @@
 import logging
+import os
 from abc import ABCMeta, abstractmethod
 
 
@@ -29,7 +30,9 @@ class BaseSkill:
             assert NotImplementedError("method 'log_path' isn't implemented")
             return
         logger = logging.getLogger(self.name)
-        handler = logging.FileHandler(self.log_path)
+        BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+        PATH = os.path.join(BASE_DIR, self.log_path)
+        handler = logging.FileHandler(PATH)
         handler.setFormatter(logging.Formatter('%(asctime)s: %(message)s'))
         logger.setLevel(logging.INFO)
         logger.addHandler(handler)
@@ -48,15 +51,18 @@ class BaseSkill:
 
 class Command:
     def __init__(self, words=None, states=None, action=None):
-        if words:
+        if words is not None:
             self.words = tuple(words)
-        if states:
-            self.states = tuple(states)
-        if action:
+        if states is not None:
+            if isinstance(states, tuple):
+                self.states = states
+            else:
+                self.states = (states, )
+        if action is not None:
             self.action = action
 
     def execute(self, req, res, session):
-        self.action(req, res, session)
+        self.action()(req=req, res=res, session=session)
 
 
 class CommandHandler:
@@ -76,7 +82,7 @@ class CommandHandler:
                 executed = True
                 break
 
-        if not executed and self.undefined:
+        if not executed and self.undefined is not None:
             self.undefined.execute(req, res, session)
 
     def command(self, words, states):
@@ -97,7 +103,7 @@ class CommandHandler:
     def undefined_command(self, action):
         def wrapped():
             return action
-        self.undefined = Command(action=action)
+        self.undefined = Command(action=wrapped)
         return wrapped
 
     @staticmethod
@@ -105,7 +111,7 @@ class CommandHandler:
         result = []
         for w in want:
             if w == 'user_id':
-                result.append(req['request']['user']['user_id'])
+                result.append(req['session']['user_id'])
             elif w == 'tokens':
                 result.append(req['request']['nlu']['tokens'])
             elif w == 'original_utterance':

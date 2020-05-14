@@ -1,4 +1,4 @@
-from skill import BaseSkill, CommandHandler, Command
+from .skill import BaseSkill, CommandHandler
 
 
 handler = CommandHandler()

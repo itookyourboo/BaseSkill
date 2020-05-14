@@ -1,7 +1,7 @@
 import json
 from flask import Flask, request
-from skill import BaseSkill
-from zhopa import ZhopaSkill
+from test_skill.main import ZhopaSkill
+
 
 app = Flask(__name__)
 
@@ -38,14 +38,15 @@ def get_user_id(req):
     return req['session']['user_id']
 
 
-def handle_dialog(req, skill: BaseSkill):
+def handle_dialog(req, skill):
     res = prepare_res(req)
     session = sessionStorage[skill.name]
     user_id = get_user_id(req)
 
     if not block_ping(req, res):
         if req['session']['new']:
-            skill.command_handler.hello(req=req, res=res, session=session[user_id])
+            session[user_id] = {'state': 0}
+            skill.command_handler.hello.execute(req=req, res=res, session=session[user_id])
         else:
             if user_id not in session:
                 session[user_id] = {'state': 0}
