@@ -43,5 +43,4 @@ def wtf(req, res, session):
 class ZhopaSkill(BaseSkill):
     name = 'test_skill'
     url = '/zhopa'
-    log_path = 'log/logs.txt'
     command_handler = handler

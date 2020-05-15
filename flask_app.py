@@ -1,3 +1,4 @@
+import os
 import json
 import logging
 from flask import Flask, request
@@ -7,7 +8,8 @@ from test_skill.main import ZhopaSkill
 
 app = Flask(__name__)
 logger = logging.getLogger(__name__)
-logger.addHandler(logging.FileHandler('errors.txt'))
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+logger.addHandler(logging.FileHandler(os.path.join(BASE_DIR, 'errors.txt')))
 logger.setLevel(logging.ERROR)
 
 

@@ -18,10 +18,6 @@ class BaseSkill:
         assert NotImplementedError
 
     @property
-    def log_path(self):
-        assert NotImplementedError
-
-    @property
     def command_handler(self):
         assert NotImplementedError
 
@@ -36,7 +32,7 @@ class BaseSkill:
         if self.logger is None:
             logger = logging.getLogger(self.name)
             BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-            PATH = os.path.join('/'.join(BASE_DIR.split('/')[:-1]), self.name + '/' + self.log_path)
+            PATH = os.path.join('/'.join(BASE_DIR.split('/')[:-1]), self.name + '_logs.txt')
             handler = logging.FileHandler(PATH)
             handler.setFormatter(logging.Formatter('%(asctime)s: %(message)s'))
             logger.setLevel(logging.INFO)
