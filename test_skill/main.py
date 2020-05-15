@@ -1,4 +1,4 @@
-from .skill import BaseSkill, CommandHandler
+from base_skill.skill import *
 
 
 handler = CommandHandler()
@@ -6,41 +6,42 @@ handler = CommandHandler()
 
 @handler.hello_command
 def hello(req, res, session):
-    res['response']['text'] = 'Привет, сыграем?'
+    res.text = 'Привет, сыграем?'
+    res.buttons = [button(txt) for txt in ('Да', 'Нет')]
 
 
 @handler.command(words=('да', 'даа'), states=0)
 def yes(req, res, session):
-    res['response']['text'] = 'Ну поехали'
+    res.text = 'Ну поехали'
     session['state'] = 1
     session['points'] = 0
-    session['word'] = 'Залупа'
+    session['word'] = 'залупа'
 
 
 @handler.command(words=('нет', 'не'), states=0)
 def no(req, res, session):
-    res['response']['text'] = 'Ну как хочешь. Пока'
+    res.text = 'Ну как хочешь. Пока'
     session['state'] = 0
-    res['session']['end_session'] = True
+    res.end_session = True
 
 
 @handler.undefined_command(states=1)
 def play(req, res, session):
-    user_id, tokens = CommandHandler.get_from_req(req, ('user_id', 'tokens'))
-    if 'залупа' in tokens:
-        res['response']['text'] = 'Красава'
+    tokens = req.tokens
+    if session['word'] in tokens:
+        res.text = 'Красава'
         session['points'] += 1
     else:
-        res['response']['text'] = 'Дебил'
+        res.text = 'Дебил'
 
 
 @handler.undefined_command(states=0)
 def wtf(req, res, session):
-    res['response']['text'] = 'Я не понимаю тебя'
+    res.text = 'Я не понимаю тебя'
 
 
 class ZhopaSkill(BaseSkill):
-    name = 'zhopa'
+    name = 'test_skill'
     url = '/zhopa'
     log_path = 'log/logs.txt'
     command_handler = handler

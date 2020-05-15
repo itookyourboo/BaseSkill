@@ -1,5 +1,6 @@
 import json
 from flask import Flask, request
+from base_skill.skill import Response, Request
 from test_skill.main import ZhopaSkill
 
 
@@ -46,11 +47,11 @@ def handle_dialog(req, skill):
     if not block_ping(req, res):
         if req['session']['new']:
             session[user_id] = {'state': 0}
-            skill.command_handler.hello.execute(req=req, res=res, session=session[user_id])
+            skill.command_handler.hello.execute(req=Request(req), res=Response(res), session=session[user_id])
         else:
             if user_id not in session:
                 session[user_id] = {'state': 0}
-            skill.command_handler.execute(req=req, res=res, session=session[user_id])
+            skill.command_handler.execute(req=Request(req), res=Response(res), session=session[user_id])
 
-        skill.log(req=req, res=res, session=session)
+        skill.log(req=Request(req), res=Response(res), session=session)
     return json.dumps(res)

@@ -36,7 +36,7 @@ class BaseSkill:
         if self.logger is None:
             logger = logging.getLogger(self.name)
             BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-            PATH = os.path.join(BASE_DIR, self.log_path)
+            PATH = os.path.join('/'.join(BASE_DIR.split('/')[:-1]), self.name + '/' + self.log_path)
             handler = logging.FileHandler(PATH)
             handler.setFormatter(logging.Formatter('%(asctime)s: %(message)s'))
             logger.setLevel(logging.INFO)
@@ -45,13 +45,90 @@ class BaseSkill:
         return self.logger
 
     def log(self, req, res, session):
-        user_id, original_utterance = CommandHandler.get_from_req(req, want=('user_id', 'original_utterance'))
-        original_utterance = req.get('request', {}).get('original_utterance', 'Empty request')
         self.get_logger().info(f"\n"
-                               f"USR: {user_id[:5]}\n"
-                               f"REQ: {original_utterance}\n"
-                               f"RES: {res['response']['text']}\n"
+                               f"USR: {req.user_id[:5]}\n"
+                               f"REQ: {req.text}\n"
+                               f"RES: {res.text}\n"
                                f"----------------------")
+
+
+class Request:
+    def __init__(self, req):
+        self.req = req
+
+    @property
+    def has_screen(self):
+        return 'screen' in self.req['meta']['interfaces']
+
+    @property
+    def new_session(self):
+        return self.req['session']['new']
+
+    @property
+    def user_id(self):
+        return self.req['session']['user']['user_id']
+
+    @property
+    def app_id(self):
+        return self.req['session']['application']['application_id']
+
+    @property
+    def text(self):
+        if 'original_utterance' in self.req['request']:
+            return self.req['request']['original_utterance']
+        elif 'text' in self.req['request'].get('payload', {}):
+            return self.req['request']['payload']['text']
+
+    @property
+    def tokens(self):
+        return self.req['request']['nlu']['tokens']
+
+
+class Response:
+    def __init__(self, res):
+        self.res = res
+
+    @property
+    def text(self):
+        return self.res['response'].get('text', '')
+
+    @text.setter
+    def text(self, x):
+        self.res['response']['text'] = x
+
+    @property
+    def tts(self):
+        return self.res['response'].get('tts', self.text)
+
+    @tts.setter
+    def tts(self, x):
+        self.res['response']['tts'] = x
+
+    @property
+    def buttons(self):
+        return self.res['response'].get('buttons', [])
+
+    @buttons.setter
+    def buttons(self, x):
+        self.res['response']['buttons'] = x
+
+    @property
+    def end_session(self):
+        return self.res['response']['end_session']
+
+    @end_session.setter
+    def end_session(self, x):
+        self.res['response']['end_session'] = x
+
+
+def button(title='Title', hide=True, url=None):
+    d = {
+        'title': title,
+        'hide': hide
+    }
+    if url is not None:
+        d['url'] = url
+    return d
 
 
 class Command:
@@ -77,7 +154,7 @@ class CommandHandler:
         self.hello = None
 
     def execute(self, req, res, session):
-        tokens = req['request']['nlu']['tokens']
+        tokens = req.tokens
         executed = False
         for cmd in self.commands:
             if session['state'] not in cmd.states:
@@ -120,16 +197,3 @@ class CommandHandler:
 
         return decorator
 
-    @staticmethod
-    def get_from_req(req, want):
-        result = []
-        for w in want:
-            if w == 'user_id':
-                result.append(req['session']['user_id'])
-            elif w == 'tokens':
-                result.append(req['request']['nlu']['tokens'])
-            elif w == 'original_utterance':
-                result.append(req['request']['original_utterance'])
-            else:
-                result.append('Добавь обработку')
-        return result
