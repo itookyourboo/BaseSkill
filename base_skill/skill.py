@@ -25,9 +25,6 @@ class BaseSkill:
         if self.name is None:
             assert NotImplementedError("method 'name' isn't implemented")
             return
-        if self.log_path is None:
-            assert NotImplementedError("method 'log_path' isn't implemented")
-            return
 
         if self.logger is None:
             logger = logging.getLogger(self.name)
