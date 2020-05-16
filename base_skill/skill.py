@@ -15,10 +15,6 @@ class BaseSkill:
         assert NotImplementedError
 
     @property
-    def url(self):
-        assert NotImplementedError
-
-    @property
     def command_handler(self):
         assert NotImplementedError
 

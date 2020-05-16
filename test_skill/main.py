@@ -42,5 +42,4 @@ def wtf(req, res, session):
 
 class ZhopaSkill(BaseSkill):
     name = 'test_skill'
-    url = '/zhopa'
     command_handler = handler
