@@ -6,16 +6,19 @@ from test_skill.main import ZhopaSkill
 
 app = Flask(__name__)
 
-zhopa = ZhopaSkill()
+SKILLS = [ZhopaSkill()]
+skill_dict = {skill.name: skill for skill in SKILLS}
 sessionStorage = {
-    zhopa.name: {}
+    skill.name: {} for skill in SKILLS
 }
 
 
-@app.route(zhopa.url, methods=['POST'])
-def main():
-    req = request.json
-    return handle_dialog(req, zhopa)
+@app.route('/<skill>', methods=['POST'])
+def main(skill):
+    if skill in skill_dict:
+        req = request.json
+        return handle_dialog(req, skill_dict[skill])
+    return '404'
 
 
 def prepare_res(req):
@@ -29,31 +32,28 @@ def prepare_res(req):
 
 
 def block_ping(req, res):
-    if req.get('request', {}).get('original_utterance', '') == 'ping':
-        res['response']['text'] = 'Всё работает!'
+    if req.text == 'ping':
+        res.text = 'Всё работает'
         return True
     return False
 
 
-def get_user_id(req):
-    return req['session']['user_id']
-
-
 def handle_dialog(req, skill):
-    res = prepare_res(req)
+    res = Response(prepare_res(req))
+    req = Request(req)
     session = sessionStorage[skill.name]
-    user_id = get_user_id(req)
+    user_id = req.user_id
 
     if not block_ping(req, res):
-        if req['session']['new']:
+        if req.new_session:
             session[user_id] = {'state': 0}
-            skill.command_handler.hello.execute(req=Request(req), res=Response(res), session=session[user_id])
+            skill.command_handler.hello.execute(req=req, res=res, session=session[user_id])
         else:
             if user_id not in session:
                 session[user_id] = {'state': 0}
 
-            skill.command_handler.execute(req=Request(req), res=Response(res), session=session[user_id])
+            skill.command_handler.execute(req=req, res=res, session=session[user_id])
 
-        skill.log(req=Request(req), res=Response(res), session=session)
+        skill.log(req=req, res=res, session=session[user_id])
 
-    return json.dumps(res)
+    return json.dumps(res.res)
