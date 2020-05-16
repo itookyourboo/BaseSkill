@@ -1,9 +1,10 @@
-import logging
+import datetime
 import os
 from abc import ABCMeta, abstractmethod
 
 
 class BaseSkill:
+    BASE_DIR = '/'.join(os.path.dirname(os.path.abspath(__file__)).split('/')[:-1])
     __metaclass__ = ABCMeta
 
     def __init__(self):
@@ -21,28 +22,10 @@ class BaseSkill:
     def command_handler(self):
         assert NotImplementedError
 
-    def get_logger(self):
-        if self.name is None:
-            assert NotImplementedError("method 'name' isn't implemented")
-            return
-
-        if self.logger is None:
-            logger = logging.getLogger(self.name)
-            BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-            PATH = os.path.join('/'.join(BASE_DIR.split('/')[:-1]), self.name + '_logs.txt')
-            handler = logging.FileHandler(PATH)
-            handler.setFormatter(logging.Formatter('%(asctime)s: %(message)s'))
-            logger.setLevel(logging.INFO)
-            logger.addHandler(handler)
-            self.logger = logger
-        return self.logger
-
     def log(self, req, res, session):
-        self.get_logger().info(f"\n"
-                               f"USR: {req.user_id[:5]}\n"
-                               f"REQ: {req.text}\n"
-                               f"RES: {res.text}\n"
-                               f"----------------------")
+        with open(f'{BaseSkill.BASE_DIR}/{self.name}_logs.txt', 'a') as file:
+            file.write(f'\n{datetime.datetime.now()}\nUSR: {req.user_id[:5]}\nREQ: {req.text}\nRES: {res.text}\n'
+                       f'------------------')
 
 
 class Request:

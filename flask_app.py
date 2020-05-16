@@ -1,17 +1,10 @@
 import os
 import json
-import logging
 from flask import Flask, request
 from base_skill.skill import Response, Request
 from test_skill.main import ZhopaSkill
 
-
 app = Flask(__name__)
-logger = logging.getLogger(__name__)
-BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-logger.addHandler(logging.FileHandler(os.path.join(BASE_DIR, 'errors.txt')))
-logger.setLevel(logging.ERROR)
-
 
 zhopa = ZhopaSkill()
 sessionStorage = {
@@ -47,22 +40,20 @@ def get_user_id(req):
 
 
 def handle_dialog(req, skill):
-    try:
-        res = prepare_res(req)
-        session = sessionStorage[skill.name]
-        user_id = get_user_id(req)
+    res = prepare_res(req)
+    session = sessionStorage[skill.name]
+    user_id = get_user_id(req)
 
-        if not block_ping(req, res):
-            if req['session']['new']:
+    if not block_ping(req, res):
+        if req['session']['new']:
+            session[user_id] = {'state': 0}
+            skill.command_handler.hello.execute(req=Request(req), res=Response(res), session=session[user_id])
+        else:
+            if user_id not in session:
                 session[user_id] = {'state': 0}
-                skill.command_handler.hello.execute(req=Request(req), res=Response(res), session=session[user_id])
-            else:
-                if user_id not in session:
-                    session[user_id] = {'state': 0}
-                skill.command_handler.execute(req=Request(req), res=Response(res), session=session[user_id])
 
-            skill.log(req=Request(req), res=Response(res), session=session)
-        return json.dumps(res)
-    except Exception as e:
-        logger.error(f'{skill.name}: {e}')
-        return {}
+            skill.command_handler.execute(req=Request(req), res=Response(res), session=session[user_id])
+
+        skill.log(req=Request(req), res=Response(res), session=session)
+
+    return json.dumps(res)
