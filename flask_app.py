@@ -2,11 +2,11 @@ import os
 import json
 from flask import Flask, request
 from base_skill.skill import Response, Request
-from test_skill.main import ZhopaSkill
+from test_skill.main import TestSkill
 
 app = Flask(__name__)
 
-SKILLS = [ZhopaSkill()]
+SKILLS = [TestSkill()]
 skill_dict = {skill.name: skill for skill in SKILLS}
 sessionStorage = {
     skill.name: {} for skill in SKILLS
