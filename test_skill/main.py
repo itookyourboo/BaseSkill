@@ -8,6 +8,7 @@ handler = CommandHandler()
 def hello(req, res, session):
     res.text = 'Привет, сыграем?'
     res.buttons = [button(txt) for txt in ('Да', 'Нет')]
+    session['state'] = 0
 
 
 @handler.command(words=('да', 'даа'), states=0)

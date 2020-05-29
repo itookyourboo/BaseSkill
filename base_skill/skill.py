@@ -138,7 +138,7 @@ class CommandHandler:
 
         if not executed and len(self.undefined):
             for cmd in self.undefined:
-                if session['state'] in cmd.states:
+                if session['state'] in cmd.states or cmd.states is None:
                     cmd.execute(req, res, session)
                     return
 

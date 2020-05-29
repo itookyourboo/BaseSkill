@@ -46,11 +46,11 @@ def handle_dialog(req, skill):
 
     if not block_ping(req, res):
         if req.new_session:
-            session[user_id] = {'state': 0}
+            session[user_id] = {}
             skill.command_handler.hello.execute(req=req, res=res, session=session[user_id])
         else:
             if user_id not in session:
-                session[user_id] = {'state': 0}
+                session[user_id] = {}
 
             skill.command_handler.execute(req=req, res=res, session=session[user_id])
 
