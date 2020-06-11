@@ -54,7 +54,7 @@ def play(req, res, session):
 
 #### flask_app.py
 Здесь импортируем все наши навыки и кладём их в SKILLS
-```
+```python
 from test_skill import TestSkill
 from another_skill import AnotherSkill
 ...
