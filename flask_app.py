@@ -1,4 +1,3 @@
-import os
 import json
 from flask import Flask, request
 from base_skill.skill import Response, Request
@@ -31,11 +30,8 @@ def prepare_res(req):
     }
 
 
-def block_ping(req, res):
-    if req.text == 'ping':
-        res.text = 'Всё работает'
-        return True
-    return False
+def ping(req, res):
+    return req.text == 'ping'
 
 
 def handle_dialog(req, skill):
@@ -44,7 +40,7 @@ def handle_dialog(req, skill):
     session = sessionStorage[skill.name]
     user_id = req.user_id
 
-    if not block_ping(req, res):
+    if not ping(req, res):
         if req.new_session:
             session[user_id] = {}
             skill.command_handler.hello.execute(req=req, res=res, session=session[user_id])
@@ -55,5 +51,7 @@ def handle_dialog(req, skill):
             skill.command_handler.execute(req=req, res=res, session=session[user_id])
 
         skill.log(req=req, res=res, session=session[user_id])
+    else:
+        res.text = 'pong'
 
     return json.dumps(res.res)
