@@ -38,7 +38,9 @@ class Request:
 
     @property
     def user_id(self):
-        return self.req['session']['user']['user_id']
+        if 'user' in self.req['session']:
+            return self.req['session']['user']['user_id']
+        return self.req['session']['user_id']
 
     @property
     def app_id(self):
@@ -168,4 +170,3 @@ class CommandHandler:
             return wrapped
 
         return decorator
-
