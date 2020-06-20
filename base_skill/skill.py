@@ -57,6 +57,10 @@ class Request:
     def tokens(self):
         return self.req['request']['nlu']['tokens']
 
+    @property
+    def entities(self):
+        return self.req['request']['nlu']['entities']
+
 
 class Response:
     def __init__(self, res):
@@ -93,6 +97,45 @@ class Response:
     @end_session.setter
     def end_session(self, x):
         self.res['response']['end_session'] = x
+
+    @property
+    def card(self):
+        return self.res['response']['card']
+
+    @card.setter
+    def card(self, x):
+        self.res['response']['card'] = x.json
+
+
+class BigImageCard:
+    def __init__(self):
+        self.json = {
+            'type': 'BigImage'
+        }
+
+    @property
+    def title(self):
+        return self.json['title']
+
+    @title.setter
+    def title(self, x):
+        self.json['title'] = x
+
+    @property
+    def description(self):
+        return self.json['description']
+
+    @description.setter
+    def description(self, x):
+        self.json['description'] = x
+
+    @property
+    def image_id(self):
+        return self.json['image_id']
+
+    @image_id.setter
+    def image_id(self, x):
+        self.json['image_id'] = x
 
 
 def button(title='Title', hide=True, url=None):
@@ -131,7 +174,7 @@ class CommandHandler:
         tokens = req.tokens
         executed = False
         for cmd in self.commands:
-            if session['state'] not in cmd.states:
+            if session.get('state', 0) not in cmd.states:
                 continue
             if any(word in cmd.words for word in tokens):
                 cmd.execute(req, res, session)
@@ -140,7 +183,7 @@ class CommandHandler:
 
         if not executed and len(self.undefined):
             for cmd in self.undefined:
-                if session['state'] in cmd.states or cmd.states is None:
+                if session.get('state', 0) in cmd.states or cmd.states is None:
                     cmd.execute(req, res, session)
                     return
 
