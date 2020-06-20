@@ -100,42 +100,45 @@ class Response:
 
     @property
     def card(self):
-        return self.res['response']['card']
+        if 'card' in self.res['response']:
+            return BigImageCard(self.res['response']['card'])
+        return None
 
     @card.setter
     def card(self, x):
-        self.res['response']['card'] = x.json
+        if isinstance(x, BigImageCard):
+            self.res['response']['card'] = x.card
+        elif isinstance(x, dict):
+            self.res['response']['card'] = x
 
 
 class BigImageCard:
-    def __init__(self):
-        self.json = {
-            'type': 'BigImage'
-        }
+    def __init__(self, res=None):
+        self.card = res if res else {'type': 'BigImage'}
 
     @property
     def title(self):
-        return self.json['title']
+        return self.card['title']
 
     @title.setter
     def title(self, x):
-        self.json['title'] = x
+        self.card['title'] = x
 
     @property
     def description(self):
-        return self.json['description']
+        return self.card['description']
 
     @description.setter
     def description(self, x):
-        self.json['description'] = x
+        self.card['description'] = x
 
     @property
     def image_id(self):
-        return self.json['image_id']
+        return self.card['image_id']
 
     @image_id.setter
     def image_id(self, x):
-        self.json['image_id'] = x
+        self.card['image_id'] = x
 
 
 def button(title='Title', hide=True, url=None):
