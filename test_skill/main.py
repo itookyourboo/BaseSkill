@@ -16,7 +16,7 @@ def hello(req, res, session):
 @handler.command(words=tkn(WORDS_YES), states=State.HELLO)
 def yes(req, res, session):
     res.text = txt(TEXT_PLAY)
-    session['state'] = 1
+    session['state'] = State.PLAY
     session['points'] = 0
     session['word'] = 'слово'
 
