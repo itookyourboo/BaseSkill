@@ -3,7 +3,11 @@
 ❗️ Адаптирован под хостинг PythonAnyWhere ❗️
 
 ## А как он в плане...?
-Вот пример навыка, реализованного на данном фреймворке<br>
+Примеры навыков, реализованных на данном фреймворке<br>
+#### Веселые минитесты
+GitHub - https://github.com/itookyourboo/alice_minitest<br>
+Алиса - https://dialogs.yandex.ru/store/skills/79dc14f5-veselye-minitesty
+#### Имя для питомца
 GitHub - https://github.com/itookyourboo/animal-names<br>
 Алиса - https://dialogs.yandex.ru/store/skills/9a733c88-imya-dlya-pitom
 
